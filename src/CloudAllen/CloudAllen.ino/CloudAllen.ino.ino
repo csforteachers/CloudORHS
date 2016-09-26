@@ -43,9 +43,9 @@ void setup() {
     delay(1000);
   }
 
-  WiFiMulti.addAP("HOME-XYZ", "1st2oosxturbo1onissan");
+  WiFiMulti.addAP("xx-xx", "xxx");
   Serial.begin(9600);
-  Blynk.begin("hello", "HOME-XYZ", "1st2oosxturbo1onissan");
+  Blynk.begin("hello", "xx-xx", "xxx");
 
 }
 
