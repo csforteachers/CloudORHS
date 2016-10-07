@@ -16,23 +16,18 @@
 #include <ESP8266HTTPClient.h>
 
 #define USE_SERIAL Serial
-#define BLYNK_PRINT Serial
-// Pin definitions
-#define LED_PIN           5
-#define WEATHER_LED_PIN   V1
-#define DISCO_LED_PIN     V5
-#define ZERGBA_PIN        V8
+
 
 ESP8266WiFiMulti WiFiMulti;
-int greenPin = 14;
-int bluePin = 4;
-int redPin = 5;
 int areaCode = 5345679;
 int control = 0;
-DynamicJsonBuffer jsonBuffer;
+const byte SERIAL_SOF = 0xA5;
+const byte SERIAL_EOF = 0x5A;
+const int OUT_BUF_MAX = 3;        
+
 
 void setup() {
-  USE_SERIAL.begin(115200);
+  USE_SERIAL.begin(9600);
   USE_SERIAL.println();
   USE_SERIAL.println();
   USE_SERIAL.println();
@@ -43,18 +38,18 @@ void setup() {
     delay(1000);
   }
 
-  WiFiMulti.addAP("xx-xx", "xxx");
+  WiFiMulti.addAP("aaa", "aaa");
   Serial.begin(9600);
-  Blynk.begin("hello", "xx-xx", "xxx");
 
 }
 
 void loop() {
-  Blynk.run();
+  changeCity("El Dorado Hills");
   retrieveAndLight();
 }
 
 void retrieveAndLight(){ //0 for automatic weather 1 for manual blink
+  DynamicJsonBuffer jsonBuffer;
   if(control == 0){
       if((WiFiMulti.run() == WL_CONNECTED)) {
         HTTPClient http;
@@ -95,37 +90,55 @@ void retrieveAndLight(){ //0 for automatic weather 1 for manual blink
 }
 
 void parseWeatherConditionID(int i){
+  byte msg[1];
   if (i == 800){
     USE_SERIAL.printf("Clear Skies: %d\n",i);
+    msg[0]=0x01;
+    transmitMessage(msg,1);
     return;  
   }
   else if (i==962){
     USE_SERIAL.printf("Hurricane: %d\n",i);
+    msg[0]=0x02;
+    transmitMessage(msg,1);
   }
   i=i/100;
   if (i==2){
     USE_SERIAL.printf("Thunderstorm: %d\n",i);
+    msg[0]=0x03;
+    transmitMessage(msg,1);
   }
   else if (i==3){
     USE_SERIAL.printf("Drizzle: %d\n",i);
+    msg[0]=0x04;
+    transmitMessage(msg,1);
   }
   else if (i==5){
     USE_SERIAL.printf("Rain: %d\n",i);
+    msg[0]=0x05;
+    transmitMessage(msg,1);
   }
   else if (i==6){
     USE_SERIAL.printf("Snow: %d\n",i);
+    msg[0]=0x06;
+    transmitMessage(msg,1);
   }
   else if (i==7){
     USE_SERIAL.printf("Crap: %d\n",i);
+    msg[0]=0x07;
+    transmitMessage(msg,1);
   }
   else if (i==8){
     USE_SERIAL.printf("Clouds: %d\n",i);
+    msg[0]=0x08;
+    transmitMessage(msg,1);
   }
 }
 
 void changeCity(String cityName){
   if(cityName =="El Dorado Hills")
   {
+
     areaCode = 5345679;
   }
   else if(cityName =="Folsom")
@@ -169,34 +182,33 @@ void changeCity(String cityName){
     areaCode = 2643741;
   } 
 }
-BLYNK_WRITE(ZERGBA_PIN)
-{
-  control=1;
-  int pinValue = param.asInt(); // assigning incoming value from pin V1 to a variable
-  // You can also use:
-  // String i = param.asStr();
-  // double d = param.asDouble();
-  Serial.print("Zebra value is: ");
-  Serial.println(pinValue);
-}
-BLYNK_WRITE(DISCO_LED_PIN)
-{
-  control=1;
-  int pinValue = param.asInt(); // assigning incoming value from pin V1 to a variable
-  // You can also use:
-  // String i = param.asStr();
-  // double d = param.asDouble();
-  Serial.print("Disco value is: ");
-  Serial.println(pinValue);
-}
-BLYNK_WRITE(WEATHER_LED_PIN)
-{
-  control=0;
-  int pinValue = param.asInt(); // assigning incoming value from pin V1 to a variable
-  // You can also use:
-  // String i = param.asStr();
-  // double d = param.asDouble();
-  Serial.print("Manual value is: ");
-  Serial.println(pinValue);
+void transmitMessage(byte msg[], uint8_t len) {
+  
+  int i;
+  byte cs;
+  byte *out_buf;
+  uint8_t buf_size;
+  
+  // If message is greater than max size, only xmit max bytes
+  if ( len > OUT_BUF_MAX ) {
+    len = OUT_BUF_MAX;
+  }
+  
+  // Full buffer is message + SOF, EOF bytes
+  buf_size = len + 2;
+  
+  // Create the output buffer with BEGIN, SOF, CS, and EOF
+  out_buf = (byte*)malloc(buf_size * sizeof(byte));
+  out_buf[0] = SERIAL_SOF;
+  memcpy(out_buf + 1, msg, len);
+  out_buf[buf_size - 1] = SERIAL_EOF;
+  
+  // Transmit buffer
+  for ( i = 0; i < buf_size; i++ ) {
+    Serial.write(out_buf[i]);
+  }
+  
+  // Free some memory
+  free(out_buf);
 }
 
