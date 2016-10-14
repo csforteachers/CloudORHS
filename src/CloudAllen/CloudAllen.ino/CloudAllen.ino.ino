@@ -38,7 +38,7 @@ void setup() {
     delay(1000);
   }
 
-  WiFiMulti.addAP("aaa", "aaa");
+  WiFiMulti.addAP("Academic", "iwtflaeitf");
   Serial.begin(9600);
 
 }
