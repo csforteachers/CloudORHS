@@ -37,14 +37,17 @@ void loop() {
   bytes_received = receiveMessage(in_msg, TIMEOUT);
   if (bytes_received > 0) {
     Serial.println(in_msg[0]);
-    int randomseed = random(1,2);
+    int randomseed = random(1,4);
     //Conditionals for Cloud Data
     Serial.println("Recieved in_msg: "+in_msg[0]);
     if (in_msg[0] == 0x01) {
       if(randomseed==1){
         clearClouds();
-      }else{
+      }else if(randomseed==2){
         springDay();
+      }
+      else{
+        rainbowSky();
       }
     }else if (in_msg[0] == 0x02) {
       if(randomseed==1){
@@ -164,7 +167,7 @@ uint32_t Wheel(byte WheelPos) {
 
 //User submitted code
 
-void sunrise(){
+void sunrise(){ //Zach and Lasse
 
   for(int i = 300; i > 250; i--) {
     pixels.setPixelColor(i, 150, 50, 0);
@@ -201,11 +204,12 @@ void sunrise(){
 void springDay() { //Wolfgang & Vaughn
   for (int i = 50; i < 300; i++) {
     pixels.setPixelColor(i, 0, 170, 175);
-  }
+    pixels.show();
+    }
   for (int i = 0; i < 50; i++) {
     pixels.setPixelColor(i, 255, 255, 0);
+    pixels.show();
   }
-  pixels.show();
 }
 void snow() { //Dustin & Jamal
   int x = 0;
