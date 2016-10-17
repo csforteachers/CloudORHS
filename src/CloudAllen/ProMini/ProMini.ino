@@ -37,23 +37,23 @@ void loop() {
   bytes_received = receiveMessage(in_msg, TIMEOUT);
   if (bytes_received > 0) {
     Serial.println(in_msg[0]);
-    int randomseed = random(1);
+    int randomseed = random(1,2);
     //Conditionals for Cloud Data
     Serial.println("Recieved in_msg: "+in_msg[0]);
     if (in_msg[0] == 0x01) {
-      if(randomseed){
+      if(randomseed==1){
         clearClouds();
       }else{
         springDay();
       }
     }else if (in_msg[0] == 0x02) {
-      if(randomseed){
+      if(randomseed==1){
         lightningStorm();
       }else{
         rain();
       }
     }else if (in_msg[0] == 0x03) {
-      if(randomseed){
+      if(randomseed==1){
         lightningStorm();
       }else{
         rain();
@@ -61,7 +61,7 @@ void loop() {
     }else if (in_msg[0] == 0x04) {
       rain();
     }else if (in_msg[0] == 0x05) {
-      rain();
+        rain();
     }else if (in_msg[0] == 0x06) {
       snow();
     }else if (in_msg[0] == 0x07) {
@@ -148,6 +148,7 @@ void rainbowCycle() {
     delay(1);
   }
 }
+
 uint32_t Wheel(byte WheelPos) {
   WheelPos = 255 - WheelPos;
   if (WheelPos < 85) {
@@ -163,46 +164,52 @@ uint32_t Wheel(byte WheelPos) {
 
 //User submitted code
 
-void sunrise() { //Zach & Lasse
-  for (int i = 0; i < 100; i++) { //for the first 100 LEDs
-    pixels.setPixelColor(i, 150, 20, 0);
+void sunrise(){
+
+  for(int i = 300; i > 250; i--) {
+    pixels.setPixelColor(i, 150, 50, 0);
+    delay(100);
+    pixels.show();
   }
-  delay(2000);
-  pixels.show();
-  for (int i = 101; i < 150; i++) { //for LEDs 101 to 150
+  for(int i = 250; i > 200; i--) {
+    pixels.setPixelColor(i, 150, 70, 0);
+    delay(100);
+    pixels.show();
+  }
+  for(int i = 200; i > 150; i--) {
     pixels.setPixelColor(i, 150, 90, 0);
+    delay(100);
+    pixels.show();
   }
-  delay(2000);
-  pixels.show();
-  for (int i = 151; i < 250; i++) { //for LEDs 151 to 250
+  for(int i = 150; i > 100; i--) {
+    pixels.setPixelColor(i, 150, 20, 0);
+    delay(100);
+    pixels.show();
+  }
+  for(int i = 100; i > 50; i--) {
+    pixels.setPixelColor(i, 150, 40, 0);
+    delay(100);
+    pixels.show();
+  }
+  for(int i = 50; i > 0; i--) {
     pixels.setPixelColor(i, 150, 50, 0);
+    delay(100);
+    pixels.show();
   }
-  delay(2000);
-  pixels.show();
-  for (int i = 251; i < 260; i++) { //for LEDs 251 to 260
-    pixels.setPixelColor(i, 150, 50, 0);
-  }
-  delay(2000);
-  pixels.show();
-  for (int i = 261; i < 300; i++) {
-    pixels.setPixelColor(i, 150, 75, 0);
-  }
-  delay(2000);
-  pixels.show();
 }
 
 void springDay() { //Wolfgang & Vaughn
-  for (int i = 0; i < 280; i++) {
+  for (int i = 50; i < 300; i++) {
     pixels.setPixelColor(i, 0, 170, 175);
   }
-  for (int i = 281; i < 300; i++) {
+  for (int i = 0; i < 50; i++) {
     pixels.setPixelColor(i, 255, 255, 0);
   }
   pixels.show();
 }
 void snow() { //Dustin & Jamal
   int x = 0;
-  while (true) {
+  for(x=0; x<300; x++){
     for (int i = 0; i < 300; i++) {
       pixels.setPixelColor(i, 17, 72, 143);
     }
@@ -212,11 +219,7 @@ void snow() { //Dustin & Jamal
       }
     }
     pixels.show();
-    x++;
-    if (x >= 300) {
-      x -= 300;
-    }
-    delay(83);
+    delay(50);
   }
 }
 
@@ -395,6 +398,7 @@ void lightningReset() {
 }
 
 void rain() { //Bernard & Lan
+  for(int i =0; i<600; i++){
   for (int x = 0; x < 15; x++) {
     for (int a = 0; a < 300; a++) {
       pixels.setPixelColor(a, 5, 5, 5); //set LEDs a gray color
@@ -406,7 +410,7 @@ void rain() { //Bernard & Lan
     pixels.show();
   }
 }
-
+}
 void cloudy() { //Bernard & Lan
   for(int loopcount=0; loopcount<5; loopcount++){
     int i,a;
